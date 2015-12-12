@@ -34,7 +34,6 @@
 #include <linux/fb.h>
 #endif
 
-
 /* Version */
 #define MXT_VER_20		20
 #define MXT_VER_21		21
@@ -597,6 +596,7 @@ struct mxt_data {
 	bool is_ignore_channel_saved;
 	bool init_complete;
 	bool use_last_golden;
+	bool irq_enabled;
 	struct mutex golden_mutex;
 	bool keys_off;
 
@@ -641,6 +641,11 @@ struct mxt_data {
 	struct notifier_block fb_notif;
 #endif
 };
+
+
+#ifdef CONFIG_FB
+	struct notifier_block fb_notif;
+#endif
 
 static struct mxt_suspend mxt_save[] = {
 	{MXT_PROCG_NOISE_T22, MXT_NOISE_CTRL,
@@ -3387,6 +3392,23 @@ release_firmware:
 	return ret;
 }
 
+
+static void mxt_enable_irq(struct mxt_data *data) {
+
+	if (likely(!data->irq_enabled)) {
+		enable_irq(data->irq);
+		data->irq_enabled=true;
+	}
+}
+
+static void mxt_disable_irq(struct mxt_data *data) {
+	
+	if(likely(data->irq_enabled)) {
+		disable_irq(data->irq);
+		data->irq_enabled=false;
+	}
+}
+
 static ssize_t mxt_update_fw_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
@@ -3426,7 +3448,7 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 	}
 
 	dev_info(dev, "Identify firmware name :%s \n", fw_name);
-	disable_irq(data->irq);
+	mxt_disable_irq(data->irq);
 
 	error = mxt_load_fw(dev, fw_name);
 	if (error) {
@@ -3447,7 +3469,7 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 	}
 
 	if (data->state == APPMODE) {
-		enable_irq(data->irq);
+		mxt_enable_irq(data->irq);
 	}
 
 	kfree(fw_name);
@@ -4943,7 +4965,7 @@ static int mxt_suspend(struct device *dev)
 	struct mxt_data *data = i2c_get_clientdata(client);
 	struct input_dev *input_dev = data->input_dev;
 
-	disable_irq(client->irq);
+	mxt_disable_irq(client->irq);
 
 	data->safe_count = 0;
 	cancel_delayed_work_sync(&data->update_setting_delayed_work);
@@ -5008,7 +5030,7 @@ static int mxt_resume(struct device *dev)
 
 	mutex_unlock(&input_dev->mutex);
 
-	enable_irq(client->irq);
+	mxt_enable_irq(client->irq);
 
 	return 0;
 }
@@ -5162,6 +5184,7 @@ static int mxt_initialize_input_device(struct mxt_data *data)
 	}
 
 	data->input_dev = input_dev;
+	configure_sleep(data);
 
 	configure_sleep(data);
 
@@ -5867,7 +5890,7 @@ static void mxt_shutdown(struct i2c_client *client)
 {
 	struct mxt_data *data = i2c_get_clientdata(client);
 
-	disable_irq(data->irq);
+	mxt_disable_irq(data->irq);
 	data->state = SHUTDOWN;
 }
 
