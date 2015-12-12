@@ -640,12 +640,10 @@ struct mxt_data {
 #ifdef CONFIG_FB
 	struct notifier_block fb_notif;
 #endif
+
 };
 
 
-#ifdef CONFIG_FB
-	struct notifier_block fb_notif;
-#endif
 
 static struct mxt_suspend mxt_save[] = {
 	{MXT_PROCG_NOISE_T22, MXT_NOISE_CTRL,
@@ -3448,7 +3446,7 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 	}
 
 	dev_info(dev, "Identify firmware name :%s \n", fw_name);
-	mxt_disable_irq(data->irq);
+	mxt_disable_irq(data);
 
 	error = mxt_load_fw(dev, fw_name);
 	if (error) {
@@ -3469,7 +3467,7 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 	}
 
 	if (data->state == APPMODE) {
-		mxt_enable_irq(data->irq);
+		mxt_enable_irq(data);
 	}
 
 	kfree(fw_name);
@@ -4965,7 +4963,7 @@ static int mxt_suspend(struct device *dev)
 	struct mxt_data *data = i2c_get_clientdata(client);
 	struct input_dev *input_dev = data->input_dev;
 
-	mxt_disable_irq(client->irq);
+	mxt_disable_irq(data);
 
 	data->safe_count = 0;
 	cancel_delayed_work_sync(&data->update_setting_delayed_work);
@@ -5030,7 +5028,7 @@ static int mxt_resume(struct device *dev)
 
 	mutex_unlock(&input_dev->mutex);
 
-	mxt_enable_irq(client->irq);
+	mxt_enable_irq(data);
 
 	return 0;
 }
@@ -5890,7 +5888,7 @@ static void mxt_shutdown(struct i2c_client *client)
 {
 	struct mxt_data *data = i2c_get_clientdata(client);
 
-	mxt_disable_irq(data->irq);
+	mxt_disable_irq(data);
 	data->state = SHUTDOWN;
 }
 
