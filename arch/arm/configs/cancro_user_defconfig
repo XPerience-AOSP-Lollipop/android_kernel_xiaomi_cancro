@@ -3671,4 +3671,9 @@ CONFIG_SOUND_CONTROL_HAX_3_GPL=y
 
 #add shit
 CONFIG_THUNDERPLUG_CONTROL=y
+<<<<<<< HEAD:arch/arm/configs/cancro_user_defconfig
 >>>>>>> 89c7976... add thungerplug hotplug:arch/arm/configs/darktrap_defconfig
+=======
+CONFIG_CRYPTO_LZ4=y
+CONFIG_CPU_FREQ_GOV_DYNAMIC_INTERACTIVE=y
+>>>>>>> 37a48b00... add dynamic interactive governor:arch/arm/configs/darktrap_defconfig
