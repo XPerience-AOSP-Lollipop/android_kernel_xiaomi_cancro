@@ -4458,7 +4458,7 @@ static int reg_access(unsigned int reg)
 	return ret;
 }
 
-static int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
+int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
 	unsigned int value)
 {
 	int val;
@@ -4485,7 +4485,7 @@ static int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
 	return wcd9xxx_reg_write(&wcd9xxx->core_res, reg, val);
 }
 
-static unsigned int taiko_read(struct snd_soc_codec *codec,
+unsigned int taiko_read(struct snd_soc_codec *codec,
 				unsigned int reg)
 {
 	unsigned int val;
