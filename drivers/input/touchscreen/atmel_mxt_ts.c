@@ -640,7 +640,6 @@ struct mxt_data {
 #ifdef CONFIG_FB
 	struct notifier_block fb_notif;
 #endif
-
 };
 
 static struct mxt_suspend mxt_save[] = {
@@ -3429,7 +3428,6 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 	dev_info(dev, "Identify firmware name :%s \n", fw_name);
 	disable_irq(data->irq);
 
-
 	error = mxt_load_fw(dev, fw_name);
 	if (error) {
 		dev_err(dev, "The firmware update failed(%d)\n", error);
@@ -3450,7 +3448,6 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 
 	if (data->state == APPMODE) {
 		enable_irq(data->irq);
-
 	}
 
 	kfree(fw_name);
@@ -5010,7 +5007,9 @@ static int mxt_resume(struct device *dev)
 		mxt_start(data);
 
 	mutex_unlock(&input_dev->mutex);
+
 	enable_irq(client->irq);
+
 	return 0;
 }
 
@@ -5760,8 +5759,6 @@ static int __devinit mxt_probe(struct i2c_client *client,
 		goto err_free_input_device;
 	}
 
-	data->irq_enabled = true;
-
 	error = sysfs_create_group(&client->dev.kobj, &mxt_attr_group);
 	if (error) {
 		dev_err(&client->dev, "Failure %d creating sysfs group\n",
@@ -5869,6 +5866,7 @@ static int __devexit mxt_remove(struct i2c_client *client)
 static void mxt_shutdown(struct i2c_client *client)
 {
 	struct mxt_data *data = i2c_get_clientdata(client);
+
 	disable_irq(data->irq);
 	data->state = SHUTDOWN;
 }
