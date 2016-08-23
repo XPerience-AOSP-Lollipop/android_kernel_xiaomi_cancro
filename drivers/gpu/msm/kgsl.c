@@ -2989,7 +2989,7 @@ static long kgsl_ioctl_map_user_mem(struct kgsl_device_private *dev_priv,
 	kgsl_process_add_stats(private, entry->memtype, param->len);
 
 	trace_kgsl_mem_map(entry, param->fd);
-
+	kgsl_mem_entry_commit_process(private, entry);
 	return result;
 
 error_attach:
