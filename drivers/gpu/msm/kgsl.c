@@ -340,8 +340,8 @@ kgsl_mem_entry_track_gpuaddr(struct kgsl_process_private *process,
 	ret = kgsl_mmu_get_gpuaddr(process->pagetable, &entry->memdesc);
 	}
 
-	rb_link_node(&entry->node, parent, node);
-	rb_insert_color(&entry->node, &process->mem_rb);
+
+
 
 done:
 	return ret;
